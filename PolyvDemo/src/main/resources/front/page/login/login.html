@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../../plugins/element-ui/index.css" />
+    <link rel="stylesheet" href="../../styles/icon/iconfont.css" />
+    <link rel="stylesheet" href="../../styles/login.css">
+</head>
+
+<body>
+<noscript>你的浏览器没有启用 JavaScript ，无法为您加载网页</noscript>
+<div class="login" id="login-app">
+    <div class="login-box">
+        <div class="header">Login</div><!--这里可以改成产品名字-->
+
+        <div class="login-form">
+            <el-form ref="loginForm" :model="loginForm" :rules="loginRules" >
+                <el-form-item prop="username" >
+                    <el-input v-model="loginForm.username" type="text" auto-complete="off" placeholder="username" maxlength="20"
+                              prefix-icon="iconfont icon-user"
+                              class="input-item"  /></el-input>
+                </el-form-item>
+                <el-form-item prop="password">
+                    <el-input v-model="loginForm.password" type="password" placeholder="password"  maxlength="20"
+                              prefix-icon="iconfont icon-lock"
+                              class="input-item"  @keyup.enter.native="handleLogin" /></el-input>
+                </el-form-item>
+                <el-form-item style="width:100%;">
+                    <el-button :loading="loading" class="btn" size="medium" type="primary" style="width:100%;"
+                               @click.native.prevent="handleLogin">
+                        <span v-if="!loading">登录</span>
+                        <span v-else>登录中...</span>
+                    </el-button>
+                </el-form-item>
+            </el-form>
+        </div>
+
+        <div class="msg">
+            Don't have account?
+            <a href="#">Sign up</a><!--预留注册界面-->
+        </div>
+    </div>
+</div>
+<div id="footer">
+    <div xmlns="http://www.w3.org/1999/xhtml">©2022 Polyv <div href="" style="display: inline-block;">商务合作
+    </div> | <a href="https://www.polyv.net/help/protocol/2013/0726/99.html" target="_blank">服务协议</a> | <a
+            href="https://wwwimg.polyv.net/policy/" target="_blank">版权声明</a> | <a
+            href="https://www.polyv.net/download/" target="_blank">版本更新</a> | <a
+            href="https://www.polyv.net/help/" target="_blank">帮助中心</a> | <a
+            href="https://polyv.mike-x.com/rT9kK8" target="_blank">提供建议</a>
+    </div>
+</div>
+<!-- 开发环境版本，包含了有帮助的命令行警告 -->
+<script src="../../plugins/vue/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="../../plugins/element-ui/index.js"></script>
+<!-- 引入axios -->
+<script src="../../plugins/axios/axios.min.js"></script>
+<script src="../../js/request.js"></script>
+<script src="../../js/validate.js"></script>
+<script src="../../api/login.js"></script>
+
+<script>
+    new Vue({
+        el: '#login-app',
+        data() {
+            return {
+                loginForm:{
+                    username: '',
+                    password: ''
+                },
+                loading: false
+            }
+        },
+        computed: {
+            loginRules() {
+                const validateUsername = (rule, value, callback) => {
+                    if (value.length < 1 ) {
+                        callback(new Error('请输入用户名'))
+                    } else {
+                        callback()
+                    }
+                }
+                const validatePassword = (rule, value, callback) => {
+                    if (value.length < 6) {
+                        callback(new Error('密码必须在6位以上'))
+                    } else {
+                        callback()
+                    }
+                }
+                return {
+                    'username': [{ 'validator': validateUsername, 'trigger': 'blur' }],
+                    'password': [{ 'validator': validatePassword, 'trigger': 'blur' }]
+                }
+            }
+        },
+        created() {
+        },
+        methods: {
+            async handleLogin() {
+                this.$refs.loginForm.validate(async (valid) => {
+                    if (valid) {
+                        this.loading = true
+                        let res = await loginApi(this.loginForm)
+                        if (String(res.code) === '1') {
+                            localStorage.setItem('userInfo',JSON.stringify(res.data))
+                            window.location.href= 'https://www.polyv.net/help/'
+                        } else {
+                            this.$message.error(res.msg)
+                            this.loading = false
+                        }
+                    }
+                })
+            }
+        }
+    })
+</script>
+<!--自动切换背景图片，看需求取舍<script>
+        function auto_change_picture() {
+            var l = ["1", "2", "3", "4"];
+            for (var i = 0; i < l.length; i++) {
+                if (document.getElementById("bg" + l[i]).style.display == "block") {
+                    document.getElementById("bg" + l[i]).style.display = "none";
+                    document.getElementById("banner" + l[i]).style.display = "none";
+                    if (i + 1 >= l.length) {
+                        j = 0;
+                    } else {
+                        j = i + 1;
+                    }
+                    document.getElementById("bg" + l[j]).style.display = "block";
+                    document.getElementById("banner" + l[j]).style.display = "block";
+                    break;
+                }
+            }
+        }
+        setInterval(auto_change_picture, 6000);
+    </script>-->
+</body>
+</html>
